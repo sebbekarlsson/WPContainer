@@ -1,10 +1,15 @@
 FROM debian:jessie
 
 
+ENV MYSQL_ROOT_PASSWORD bad_password
+ENV MYSQL_USER wordpress
+ENV MYSQL_DB wordpress
+ENV MYSQL_PASSWORD bad_password
+
 RUN apt-get update -y; apt-get upgrade -y
 
-RUN echo "mysql-server mysql-server/root_password password root" | debconf-set-selections
-RUN echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD" | debconf-set-selections
+RUN echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | debconf-set-selections
 
 RUN \
     apt-get install -y \
@@ -34,9 +39,9 @@ RUN \
 
 RUN find /var/lib/mysql/mysql -exec touch -c -a {} + && \
     service mysql start && \
-    mysql -uroot -proot -e "CREATE DATABASE wordpress;" && \
-    mysql -uroot -proot -e "CREATE USER 'wordpress'@'localhost' IDENTIFIED BY 'wordpress';" && \
-    mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON wordpress.* TO 'wordpress'@'localhost' IDENTIFIED BY 'wordpress';"
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE $MYSQL_DB;" && \
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';" && \
+    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $MYSQL_DB.* TO '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
 
 EXPOSE 80 443
 
