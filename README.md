@@ -14,3 +14,4 @@
 * root password: bad\_password
 * wordpress user: wordpress
 * wordpress user password: bad\_password
+* wordpress database: wordpress
