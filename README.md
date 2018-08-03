@@ -5,7 +5,7 @@
 > To get it up and running:
 
     docker build . -t wpcontainer
-    docker run -d -p 80:80 wpcontainer
+    docker run -d -p 80:80 -p 8080:8080 wpcontainer
 
 > It should now be accessible at [http://localhost](localhost)
 
