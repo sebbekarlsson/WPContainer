@@ -14,6 +14,11 @@
 > it is accessible at: [http://localhost:8080/filemanager](localhost:8080/filemanager).  
 > Here, you can edit your wordpress files, upload themes, plugins etc.
 
+> The credentials for the file manager is:
+* user: admin
+* password: admin  
+> (_change this when logged in_)
+
 ## MySQL credentials
 > The default credentails are:  
 * root password: bad\_password
