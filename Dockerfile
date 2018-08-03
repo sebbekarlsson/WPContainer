@@ -17,6 +17,7 @@ RUN \
     openssl \
     mysql-server \
     wget \
+    curl \
     tar \
     php5 \
     php5-fpm \
@@ -43,7 +44,10 @@ RUN find /var/lib/mysql/mysql -exec touch -c -a {} + && \
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';" && \
     mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $MYSQL_DB.* TO '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
 
-EXPOSE 80 443
+RUN \
+    curl -fsSL https://filebrowser.github.io/get.sh | bash    
+
+EXPOSE 80 443 8080
 
 VOLUME ["/data", "/var/lib/mysql"]
-CMD bash `service mysql start; service nginx restart; service php5-fpm restart; tail -f /dev/null`
+CMD bash `service mysql start; service nginx restart; service php5-fpm restart; filebrowser --port 8080 --database /etc/fm.db --scope /var/www/wordpress --baseurl /filemanager`

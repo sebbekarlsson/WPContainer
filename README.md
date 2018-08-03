@@ -9,6 +9,11 @@
 
 > It should now be accessible at [http://localhost](localhost)
 
+### File manager
+> You will also be able to access the file manager after booting everything up,
+> it is accessible at: [http://localhost:8080/filemanager](localhost:8080/filemanager).  
+> Here, you can edit your wordpress files, upload themes, plugins etc.
+
 ## MySQL credentials
 > The default credentails are:  
 * root password: bad\_password
