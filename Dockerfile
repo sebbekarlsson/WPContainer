@@ -1,5 +1,7 @@
 FROM debian:jessie
 
+ENV SERVER_PORT 80
+ENV FILE_MANAGER_PORT 8080
 
 ENV MYSQL_ROOT_PASSWORD bad_password
 ENV MYSQL_USER wordpress
@@ -47,7 +49,7 @@ RUN find /var/lib/mysql/mysql -exec touch -c -a {} + && \
 RUN \
     curl -fsSL https://filebrowser.github.io/get.sh | bash    
 
-EXPOSE 80 443 8080
+EXPOSE $SERVER_PORT $FILE_MANAGER_PORT
 
 VOLUME ["/data", "/var/lib/mysql"]
-CMD bash `service mysql start; service nginx restart; service php5-fpm restart; filebrowser --port 8080 --database /etc/fm.db --scope /var/www/wordpress --baseurl /filemanager`
+CMD ["sh", "-c", "cd /etc/nginx/sites-enabled && sed -i 's/80/'$SERVER_PORT'/g' wordpress.nginx; service mysql start; service nginx restart; service php5-fpm restart; filebrowser --port $FILE_MANAGER_PORT --database /etc/fm.db --scope /var/www/wordpress --baseurl /filemanager"]

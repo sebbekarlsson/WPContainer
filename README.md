@@ -5,7 +5,7 @@
 > To get it up and running:
 
     docker build . -t wpcontainer
-    docker run -d -p 80:80 -p 8080:8080 wpcontainer
+    docker run -d -p 80:80 -p 8080:8080 -e SERVER_PORT=80 -e FILE_MANAGER_PORT=8080 wpco`ntainer
 
 > It should now be accessible at [http://localhost](localhost)
 
