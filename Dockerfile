@@ -2,6 +2,7 @@ FROM debian:jessie
 
 ENV SERVER_PORT 80
 ENV FILE_MANAGER_PORT 8080
+ENV SERVER_NAME localhost.local
 
 ENV MYSQL_ROOT_PASSWORD bad_password
 ENV MYSQL_USER wordpress
@@ -23,13 +24,17 @@ RUN \
     tar \
     php5 \
     php5-fpm \
-    php5-mysql
+    php5-mysql \
+    python
 
 ADD wordpress.nginx /tmp/
 COPY wordpress.nginx /tmp/
 
 ADD wp-config.php /tmp/
 COPY wp-config.php /tmp/
+
+ADD replace-tool.py /tmp/
+COPY replace-tool.py /tmp/
 
 RUN \
     rm /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default;\
@@ -41,15 +46,15 @@ RUN \
     mv /tmp/wp-config.php *wordpress*/.
 
 RUN find /var/lib/mysql/mysql -exec touch -c -a {} + && \
-    service mysql start && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE $MYSQL_DB;" && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';" && \
-    mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $MYSQL_DB.* TO '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';"
+    service mysql start;
 
 RUN \
-    curl -fsSL https://filebrowser.github.io/get.sh | bash    
+    curl -fsSL https://filebrowser.github.io/get.sh | bash
+
+RUN \
+    mv /tmp/replace-tool.py /usr/local/bin/.
 
 EXPOSE $SERVER_PORT $FILE_MANAGER_PORT
 
 VOLUME ["/data", "/var/lib/mysql"]
-CMD ["sh", "-c", "cd /etc/nginx/sites-enabled && sed -i 's/80/'$SERVER_PORT'/g' wordpress.nginx; service mysql start; service nginx restart; service php5-fpm restart; filebrowser --port $FILE_MANAGER_PORT --database /etc/fm.db --scope /var/www/wordpress --baseurl /filemanager"]
+CMD ["sh", "-c", "cd /etc/nginx/sites-enabled && sed -i 's/80/'$SERVER_PORT'/g' wordpress.nginx; cd /var/www/wordpress && sed -i 's/_DB_NAME/'$MYSQL_DB'/g' wp-config.php && replace-tool.py wp-config.php _AUTH \"$(curl https://api.wordpress.org/secret-key/1.1/salt/)\"; service mysql start; service nginx restart; service php5-fpm restart; mysql -uroot -p$MYSQL_ROOT_PASSWORD -e \"CREATE DATABASE $MYSQL_DB;\" && mysql -uroot -p$MYSQL_ROOT_PASSWORD -e \"CREATE USER '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';\" && mysql -uroot -p$MYSQL_ROOT_PASSWORD -e \"GRANT ALL PRIVILEGES ON $MYSQL_DB.* TO '$MYSQL_USER'@'localhost' IDENTIFIED BY '$MYSQL_PASSWORD';\"; filebrowser --port $FILE_MANAGER_PORT --database /etc/fm.db --scope /var/www/wordpress --baseurl /filemanager"]
